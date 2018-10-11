@@ -1,2 +1,5 @@
 #vs-code config files
 .vscode/
+
+#.pyc files
+__pycache__/
