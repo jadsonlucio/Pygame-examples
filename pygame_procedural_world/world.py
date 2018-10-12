@@ -2,11 +2,18 @@ from pysurface import Pygame_canvas
 
 class Camera():
     def __init__(self, map, posX, posY):
+        self.map = map
         self.posX, self.posY = posX,posY
+    
+    def move(self, x, y):
+        self.posX = self.posX + x
+        self.posY = self.posY + y
+        self.map.posX = self.posX
+        self.map.posY = self.posY
     
 class RPG_map(Pygame_canvas):
     def __init__(self, map_size, display_canvas, block_size, block_matriz, objects_dict):
-
+        self.camera = Camera(self, 0, 0)
         self.display_canvas = display_canvas
         self.block_size = block_size
         self.block_matriz = block_matriz

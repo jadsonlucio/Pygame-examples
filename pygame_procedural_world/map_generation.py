@@ -32,7 +32,7 @@ def random_walk(matrix, initial_position, max_tunnel_lenght):
 
 
 def generate_map(dimention, num_tunnels, max_tunnel_lenght):
-    matrix = np.zeros(dimention, dtype = int)
+    matrix = np.zeros(dimention, dtype = object)
     corr_pos = (0,0)
     for cont_tunnel in range(num_tunnels):
         corr_pos = random_walk(matrix, corr_pos, max_tunnel_lenght)
@@ -40,6 +40,39 @@ def generate_map(dimention, num_tunnels, max_tunnel_lenght):
 
     return matrix
 
+
+def set_block_type(posX, posY, matrix):
+    dict_count = {
+        "grass"  : 1,
+        "water"  : 1
+    }
+
+    jump_array = [-1,1,0]
+    for jump_x in jump_array:
+        for jump_y in jump_array:
+            new_posX = posX + jump_x
+            new_posY = posY + jump_y
+            if is_valid_pos(new_posX, new_posY, matrix.shape):
+                block_type = matrix[new_posX][new_posY]
+                if block_type:
+                    dict_count[block_type] = dict_count[block_type] + 1
+    
+    sum_houses = sum(dict_count.values())
+    p = [cont/sum_houses for cont in dict_count.values()]
+    matrix[posX][posY] = np.random.choice(["grass","water"], p = p)
+
+
+def generate_map_2(posX, posY, matrix):
+    jump_array = [-1,1,0]
+    for jump_x in jump_array:
+        for jump_y in jump_array:
+            new_posX = posX + jump_x
+            new_posY = posY + jump_y
+            matrix_shape = matrix.shape
+            if is_valid_pos(new_posX, new_posY, matrix_shape):
+                if not matrix[new_posX][new_posY]:
+                    set_block_type(new_posX, new_posY, matrix)
+                    set_matrix(new_posX, new_posY, matrix)
 
 if __name__ == "__main__":
     matrix = generate_map((10,10), 10, 10)

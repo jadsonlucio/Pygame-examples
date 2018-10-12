@@ -4,50 +4,26 @@ import numpy as np
 from pygame.locals import *
 
 from world import RPG_map
+from map_generation import generate_map
 from pysurface import Pygame_canvas
 
 is_valid = lambda new_pos, matrix_size :True if new_pos >= 0 and new_pos < matrix_size else False
 is_valid_pos = lambda posX,posY,matrix_shape : True if is_valid(posX, matrix_shape[0]) and is_valid(posY, matrix_shape[1]) else False
 
-def set_block_type(posX, posY, matrix):
-    dict_count = {
-        "grass"  : 1,
-        "water"  : 1
-    }
 
-    jump_array = [-1,1,0]
-    for jump_x in jump_array:
-        for jump_y in jump_array:
-            new_posX = posX + jump_x
-            new_posY = posY + jump_y
-            if is_valid_pos(new_posX, new_posY, matrix.shape):
-                block_type = matrix[new_posX][new_posY]
-                if block_type:
-                    dict_count[block_type] = dict_count[block_type] + 1
-    
-    sum_houses = sum(dict_count.values())
-    p = [cont/sum_houses for cont in dict_count.values()]
-    matrix[posX][posY] = np.random.choice(["grass","water"], p = p)
-
-
-def set_matrix(posX, posY, matrix):
-    jump_array = [-1,1,0]
-    for jump_x in jump_array:
-        for jump_y in jump_array:
-            new_posX = posX + jump_x
-            new_posY = posY + jump_y
-            matrix_shape = matrix.shape
-            if is_valid_pos(new_posX, new_posY, matrix_shape):
-                if not matrix[new_posX][new_posY]:
-                    set_block_type(new_posX, new_posY, matrix)
-                    set_matrix(new_posX, new_posY, matrix)
 
 def build_environment_matrix(shape, objects_graph):
     matrix_objects = np.empty(shape, dtype = object)
-    set_matrix(0, 0, matrix_objects)
-    print(matrix_objects)
+    matrix = generate_map(shape, 600, 20)
 
-    return matrix_objects
+    for cont in range(len(matrix)):
+        for cont2 in range(len(matrix[cont])):
+            if matrix[cont][cont2] == 0:
+                matrix[cont][cont2] = "ground"
+            elif matrix[cont][cont2] == 1:
+                matrix[cont][cont2] = "grass"
+
+    return matrix
 
 def build_rpg_map(display_surface):
     grass_object = pygame.image.load("grass.jpg")
@@ -59,8 +35,8 @@ def build_rpg_map(display_surface):
         "water": water_object,
     }
 
-    environment_matrix = build_environment_matrix((6,8), None) 
-    return RPG_map((800,600), display_surface, (100,100), environment_matrix, objects_dict)
+    environment_matrix = build_environment_matrix((100,100), None) 
+    return RPG_map((100*100,100*100), display_surface, (100,100), environment_matrix, objects_dict)
 
 class App():
     def __init__(self, name, width, height, debug = False):
@@ -68,8 +44,9 @@ class App():
         self._on_init(width, height)
 
         self.map = build_rpg_map(self._display)
-        self.map.pack(0,0)
+        self.map.pack(-100,-100)
         self.map.build()
+
 
     def run(self):
         self._running = True
@@ -92,6 +69,15 @@ class App():
     def on_event(self, event):
         if event.type == pygame.QUIT:
             self._running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                self.map.camera.move(-100,0)
+            elif event.key == pygame.K_DOWN:
+                self.map.camera.move(100,0)
+            elif event.key == pygame.K_LEFT:
+                self.map.camera.move(0, 100)
+            elif event.key == pygame.K_RIGHT:
+                self.map.camera.move(0, -100)
 
     def on_loop(self):
         pass

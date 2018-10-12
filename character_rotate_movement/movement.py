@@ -7,11 +7,8 @@ class Character:
     def __init__(self, master, pos_x, pos_y, width=32, height=32):
 
         self.image = pygame.Surface((width, height))
+        self.rect = pygame.Rect(pos_x, pos_y, width, height)
         self.original_image = self.image
-        self.pos_x = pos_x
-        self.pos_y = pos_y
-        self.width = width
-        self.height = height
         self.master = master
         self.angle = self.set_angle()
         self.font = pygame.font.SysFont("Arial", 20, bold=True)
@@ -19,25 +16,19 @@ class Character:
 
     def update(self):
         self.set_angle()
-        # self.rotate()
+        self.rotate()
         self.draw()
 
     def draw(self):
         self.master.blit(self.font.render(str(round(self.angle, 2)), False, (0, 0, 0)), (0, 0))
-        self.master.blit(self.image, (self.pos_x, self.pos_y))
-        pygame.draw.line(self.master, (255, 255, 255), self.get_center_pos(), self.mouse_pos)
-
-    def get_pos(self):
-        return (self.pos_x, self.pos_y)
-
-    def get_center_pos(self):
-        return (self.pos_x + (self.width / 2), self.pos_y + (self.height / 2))
+        self.master.blit(self.image, self.rect)
+        pygame.draw.line(self.master, (255, 255, 255), self.rect.center, self.mouse_pos)
 
     def set_angle(self):
         self.mouse_pos = pygame.mouse.get_pos()
-        pos = self.get_center_pos()
-        dx = self.mouse_pos[0] - pos[0]
-        dy = self.mouse_pos[1] - pos[1]
+        center = self.rect.center
+        dx = self.mouse_pos[0] - center[0]
+        dy = self.mouse_pos[1] - center[1]
         d = math.atan2(-dy, dx)
         d %= 2 * math.pi
 
@@ -45,6 +36,7 @@ class Character:
 
     def rotate(self):
         self.image = pygame.transform.rotate(self.original_image, self.angle)
+        self.rect = self.image.get_rect()
 
     def move(self, event):
         if event.type == pygame.KEYDOWN:
