@@ -21,31 +21,27 @@ class Canvas(Surface,Events):
 
         Events.__init__(self)
 
-    def _build_surface(self, width, height):
-        Surface.__init__(self,(width,height))
+    def _build_surface(self, width, height, flags=pygame.SRCALPHA, depth=32):
+        Surface.__init__(self,(width,height), flags, depth)
 
-    def add_child(self, pygame_surface):
-        if isinstance(pygame_surface,Canvas):
-            self.children.append(pygame_surface)
-        else:
-            raise TypeError("pygame_surface:{} is not of type Pygame_surface".
-                            format(type(Pygame_canvas.__class__.__name__)))
+    def add_child(self, canvas):
+        self.children.append(canvas)
 
     def pack(self, posX, posY):
         self.posX, self.posY = posX, posY
         if isinstance(self.master, Canvas):
             self.master.add_child(self)
 
-    def update(self, events):
+    def update(self):
+        self.update_children()
+        
         if self.has_change():
             self.draw()
         
-        self.process_events(events)
-        self.update_children()
 
-    def update_children():
+    def update_children(self):
         for child in self.children:
-            child.update(self.events)
+            child.update()
 
     def draw(self):
         self.master.blit(self, (self.posX,self.posY))
@@ -53,5 +49,11 @@ class Canvas(Surface,Events):
     def has_change(self):
         return True
 
+    def event_call(self, event):
+        if event.type in self.dict_events:
+            self.dict_events[event.type](event)
+
+        for child in self.children:
+            child.event_call(event)
         
 

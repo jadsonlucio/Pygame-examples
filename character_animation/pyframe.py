@@ -1,5 +1,5 @@
-from pywidget import Pygame_widget
+from pywidget import Widget
 
-class Frame(Pygame_widget):
+class Frame(Widget):
     def __init__(self):
         pass
